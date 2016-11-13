@@ -58,7 +58,59 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+//------------------------------------------------------------------------------
+// Pointer vs Stack Helpers
+//------------------------------------------------------------------------------
+/**
+ * If T is a pointer initialize it with nullptr
+ */
+template<class P>
+inline void
+pointerInit(P* &p)
+{
+  p = nullptr;
+}
 
+
+/**
+ * Otherwise do nothing.  In the case that T is not a pointer type then call the
+ * other function.
+ */
+template<class P>
+inline void
+pointerInit(P const&) {
+  ; // No op
+}
+
+
+/**
+ * If T is a pointer delete it
+ */
+template<class P>
+inline void
+pointerDelete(P* &p)
+{
+  if (p != nullptr) {
+    delete p;
+    p = nullptr;
+  }
+}
+
+
+/**
+ * Otherwise do nothing.  In the case that T is not a pointer type then call the
+ * other function.
+ */
+template<class P>
+inline void
+pointerDelete(P const&) {
+  ; // No op
+}
+
+
+//------------------------------------------------------------------------------
+// Optional Class
+//------------------------------------------------------------------------------
 template <typename T>
 class Optional
 {
@@ -76,9 +128,17 @@ class Optional
   struct Item {
     Item* next;
     T data;
+
     Item()
       : next(this)
-    { }
+    {
+      pointerInit(data);
+    }
+
+    ~Item()
+    {
+      pointerDelete(data);
+    }
   };
 
  private:
